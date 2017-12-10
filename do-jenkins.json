@@ -13,21 +13,21 @@
   ],
   "provisioners": [
     {
+      "source": "./files/jenkins.conf",
+      "destination": "/tmp/jenkins.conf",
+      "type": "file"
+    },
+    {
       "type": "shell",
        "environment_vars": [
         "JENKINS_USERNAME={{ user `jenkins_username` }}",
         "JENKINS_PASSWORD={{ user `jenkins_password` }}"
     ],
       "inline": [
-        "### SETUP ###",
-        "apt-get update",
-
         "### NOTES ###",
         "# Digital Ocean is using root, does not need sudo",
 
         "### START ###",
-        "useradd -m $JENKINS_USERNAME",
-        "echo $JENKINS_USERNAME:$JENKINS_PASSWORD | chpasswd",
         "# SETUP JENKINS",
         "## Install Java OpenJDK 7 and Install Jenkins",
         "apt-get install software-properties-common",
@@ -41,11 +41,16 @@
         "updatedb",
 
         "## Add Jenkins User",
-        "echo 'jenkins.model.Jenkins.instance.securityRealm.createAccount(\"$JENKINS_USERNAME\", \"$JENKINS_PASSWORD\")' | java -jar `locate jenkins-cli.jar` -auth admin:`cat /var/lib/jenkins/secrets/initialAdminPassword` -s http://localhost:8080/ groovy =",
+        "echo \"jenkins.model.Jenkins.instance.securityRealm.createAccount(\"$JENKINS_USERNAME\", \"$JENKINS_PASSWORD\")\" | java -jar `locate jenkins-cli.jar` -auth admin:`cat /var/lib/jenkins/secrets/initialAdminPassword` -s http://localhost:8080/ groovy =",
+        "## Install plugins",
+        "java -jar `locate jenkins-cli.jar` -s http://localhost:8080/ install-plugin cloudbees-folder github-api antisamy-markup-formatter build-timeout credentials-binding timestamper ws-cleanup ant  gradle workflow-aggregator github-branch-source pipeline-github-lib pipeline-stage-view git subversion ssh-slaves matrix-auth email-ext mailer --username $JENKINS_USERNAME --password $JENKINS_PASSWORD",
+        "systemctl restart jenkins",
 
         "# SETUP APACHE REVERSE PROXY",
-        "apt-get install apache2",
+        "apt-get install apache2 -y",
         "a2enmod proxy proxy_http proxy_html",
+        "mv /tmp/jenkins.conf /etc/apache2/conf-available/jenkins.conf",
+        "ln -s /etc/apache2/conf-available/jenkins.conf /etc/apache2/conf-enabled/",
         "systemctl restart apache2",
         "systemctl enable apache2"
 
