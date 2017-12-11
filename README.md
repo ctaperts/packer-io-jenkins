@@ -1,6 +1,6 @@
 # Packer io set up of jenkins
 
-Will setup a jenkins ci server without having to go through wizard
+Will setup a jenkins ci server without having to go through the wizard
 
 ## Notes
 Couple of waits due to jenkins being set up initially
