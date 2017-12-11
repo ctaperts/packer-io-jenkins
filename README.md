@@ -1,4 +1,5 @@
 # Packer io set up of jenkins
+Installs apache2, jenkins, and docker
 
 Will setup a jenkins ci server without having to go through the wizard
 
