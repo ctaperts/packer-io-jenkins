@@ -53,16 +53,19 @@
         "echo \"jenkins.model.Jenkins.instance.securityRealm.createAccount(\\\"$JENKINS_USERNAME\\\", \\\"$JENKINS_PASSWORD\\\")\" | java -jar `locate jenkins-cli.jar` -auth admin:`cat /var/lib/jenkins/secrets/initialAdminPassword` -s http://localhost:8080/ groovy =",
         "## Install plugins",
         "cd /root/ && java -jar `locate jenkins-cli.jar` -s http://localhost:8080/ install-plugin cloudbees-folder github-api antisamy-markup-formatter build-timeout credentials-binding timestamper ws-cleanup ant  gradle workflow-aggregator github-branch-source pipeline-github-lib pipeline-stage-view git subversion ssh-slaves matrix-auth email-ext mailer --username $JENKINS_USERNAME --password $JENKINS_PASSWORD",
+        "## Change jenkins to only listen on address 127.0.0.1, will be redirected with apache2",
+        "sed -i -e 's/--httpPort=$HTTP_PORT/--httpPort=$HTTP_PORT --httpListenAddress=127.0.0.1/' /etc/default/jenkins",
         "systemctl restart jenkins",
 
         "# SETUP APACHE REVERSE PROXY",
+        "mkdir /etc/ssl/jenkins",
+        "cd /etc/ssl/jenkins && openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout jenkins.key -out jenkins.crt -subj '/C=US/ST=NY/L=NY/O=jenkins/OU=jenkins/CN=jenkins'",
         "apt-get install apache2 -y",
-        "a2enmod proxy proxy_http proxy_html",
+        "a2enmod proxy proxy_http proxy_html ssl",
         "mv /tmp/jenkins.conf /etc/apache2/conf-available/jenkins.conf",
         "ln -s /etc/apache2/conf-available/jenkins.conf /etc/apache2/conf-enabled/",
         "systemctl restart apache2",
         "systemctl enable apache2"
-
       ]
     }
   ]

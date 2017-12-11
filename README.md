@@ -5,6 +5,8 @@ Will setup a jenkins ci server without having to go through wizard
 ## Notes
 Couple of waits due to jenkins being set up initially
 
+Uses SSL(HTTPS) for the webserver
+
 ## Plugins Included
 
 - cloudbees-folder
@@ -43,4 +45,6 @@ Run using
 ```
 packer-io build -var-file=secrets.json do-jenkins.json
 ```
+
+
 
