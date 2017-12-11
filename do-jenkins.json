@@ -65,7 +65,16 @@
         "mv /tmp/jenkins.conf /etc/apache2/conf-available/jenkins.conf",
         "ln -s /etc/apache2/conf-available/jenkins.conf /etc/apache2/conf-enabled/",
         "systemctl restart apache2",
-        "systemctl enable apache2"
+        "systemctl enable apache2",
+        "## Add docker",
+        "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -",
+        "add-apt-repository \\\"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\\\"",
+        "apt-get update",
+        "apt-cache policy docker-ce",
+        "apt-get install -y docker-ce",
+        "systemctl start docker",
+        "systemctl enable docker"
+
       ]
     }
   ]
