@@ -6,7 +6,7 @@ Will setup a jenkins ci server without having to go through the wizard
 ## Notes
 Couple of waits due to jenkins being set up initially
 
-Uses SSL(HTTPS) for the webserver
+Uses SSL(HTTPS) for the webserver, go to `https://ip.ad.dr.es/`
 
 ## Plugins Included
 
