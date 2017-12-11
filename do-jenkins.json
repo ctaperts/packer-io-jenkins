@@ -6,6 +6,7 @@
       "api_token": "{{ user `secret_api_token` }}",
       "droplet_name": "building-image-jenkins",
       "snapshot_name": "packer jenkins {{isotime \"02-Jan-06 03:04:05\"}}",
+      "image": "30016572",
       "image": "ubuntu-16-04-x64",
       "region": "{{ user `image_region` }}",
       "size": "512mb"
@@ -27,6 +28,10 @@
         "### NOTES ###",
         "# Digital Ocean is using root, does not need sudo",
 
+        "# VARS",
+        "export JENKINS_ADMIN_PASSWORD_FILE=\"/var/lib/jenkins/secrets/initialAdminPassword\"",
+        "export JENKIN_IP=`curl ifconfig.co`",
+
         "### START ###",
         "# SETUP JENKINS",
         "## Install Java OpenJDK 7 and Install Jenkins",
@@ -35,15 +40,19 @@
         "wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo apt-key add -",
         "echo 'deb https://pkg.jenkins.io/debian-stable binary/' | tee -a /etc/apt/sources.list",
         "apt-get update",
-        "apt-get install -y openjdk-7-jdk jenkins mlocate",
+        "apt-get install -y mlocate",
+        "apt-get install -y openjdk-7-jdk",
+        "apt-get install -y jenkins",
         "systemctl start jenkins",
         "systemctl enable jenkins",
-        "updatedb",
 
         "## Add Jenkins User",
-        "echo \"jenkins.model.Jenkins.instance.securityRealm.createAccount(\"$JENKINS_USERNAME\", \"$JENKINS_PASSWORD\")\" | java -jar `locate jenkins-cli.jar` -auth admin:`cat /var/lib/jenkins/secrets/initialAdminPassword` -s http://localhost:8080/ groovy =",
+        "while [ ! -f $JENKINS_ADMIN_PASSWORD_FILE ]; do echo @$JENKIN_IP: $JENKINS_ADMIN_PASSWORD_FILE file does not exist... sleeping && sleep 2;done",
+        "echo sleeping 10 seconds && sleep 10",
+        "updatedb",
+        "echo \"jenkins.model.Jenkins.instance.securityRealm.createAccount(\\\"$JENKINS_USERNAME\\\", \\\"$JENKINS_PASSWORD\\\")\" | java -jar `locate jenkins-cli.jar` -auth admin:`cat /var/lib/jenkins/secrets/initialAdminPassword` -s http://localhost:8080/ groovy =",
         "## Install plugins",
-        "java -jar `locate jenkins-cli.jar` -s http://localhost:8080/ install-plugin cloudbees-folder github-api antisamy-markup-formatter build-timeout credentials-binding timestamper ws-cleanup ant  gradle workflow-aggregator github-branch-source pipeline-github-lib pipeline-stage-view git subversion ssh-slaves matrix-auth email-ext mailer --username $JENKINS_USERNAME --password $JENKINS_PASSWORD",
+        "cd /root/ && java -jar `locate jenkins-cli.jar` -s http://localhost:8080/ install-plugin cloudbees-folder github-api antisamy-markup-formatter build-timeout credentials-binding timestamper ws-cleanup ant  gradle workflow-aggregator github-branch-source pipeline-github-lib pipeline-stage-view git subversion ssh-slaves matrix-auth email-ext mailer --username $JENKINS_USERNAME --password $JENKINS_PASSWORD",
         "systemctl restart jenkins",
 
         "# SETUP APACHE REVERSE PROXY",
