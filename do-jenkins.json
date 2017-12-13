@@ -52,7 +52,7 @@
         "updatedb",
         "echo \"jenkins.model.Jenkins.instance.securityRealm.createAccount(\\\"$JENKINS_USERNAME\\\", \\\"$JENKINS_PASSWORD\\\")\" | java -jar `locate jenkins-cli.jar` -auth admin:`cat /var/lib/jenkins/secrets/initialAdminPassword` -s http://localhost:8080/ groovy =",
         "## Install plugins",
-        "cd /root/ && java -jar `locate jenkins-cli.jar` -s http://localhost:8080/ install-plugin cloudbees-folder github-api antisamy-markup-formatter build-timeout credentials-binding timestamper ws-cleanup ant  gradle workflow-aggregator github-branch-source pipeline-github-lib pipeline-stage-view git subversion ssh-slaves matrix-auth email-ext mailer --username $JENKINS_USERNAME --password $JENKINS_PASSWORD",
+        "cd /root/ && java -jar `locate jenkins-cli.jar` -s http://localhost:8080/ install-plugin cloudbees-folder github-api antisamy-markup-formatter build-timeout credentials-binding timestamper ws-cleanup ant  gradle workflow-aggregator github-branch-source pipeline-github-lib pipeline-stage-view git subversion ssh-slaves matrix-auth email-ext mailer credentials-binding --username $JENKINS_USERNAME --password $JENKINS_PASSWORD",
         "## Change jenkins to only listen on address 127.0.0.1, will be redirected with apache2",
         "sed -i -e 's/--httpPort=$HTTP_PORT/--httpPort=$HTTP_PORT --httpListenAddress=127.0.0.1/' /etc/default/jenkins",
         "systemctl restart jenkins",
