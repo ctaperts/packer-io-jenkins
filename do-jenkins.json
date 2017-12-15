@@ -74,7 +74,14 @@
         "apt-cache policy docker-ce",
         "apt-get install -y docker-ce",
         "systemctl start docker",
-        "systemctl enable docker"
+        "systemctl enable docker",
+
+        "# Add 2G swap",
+        "dd if=/dev/zero of=/swapfile bs=256M count=8",
+        "chmod 600 /swapfile",
+        "mkswap /swapfile",
+        "swapon /swapfile",
+        "echo \"/swapfile   none    swap    sw    0   0\" >> /etc/fstab"
 
       ]
     }
