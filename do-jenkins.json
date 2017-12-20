@@ -32,6 +32,15 @@
         "export JENKINS_ADMIN_PASSWORD_FILE=\"/var/lib/jenkins/secrets/initialAdminPassword\"",
         "export JENKIN_IP=`curl ifconfig.co`",
 
+        "### SETUP SWAP ###",
+        "# Add 2G swap",
+        "dd if=/dev/zero of=/swapfile bs=256M count=8",
+        "chmod 600 /swapfile",
+        "mkswap /swapfile",
+        "swapon /swapfile",
+        "echo \"/swapfile   none    swap    sw    0   0\" >> /etc/fstab",
+        "sync; echo 1 > /proc/sys/vm/drop_caches",
+
         "### START ###",
         "# SETUP JENKINS",
         "## Install Java OpenJDK 7 and Install Jenkins",
@@ -52,7 +61,8 @@
         "updatedb",
         "echo \"jenkins.model.Jenkins.instance.securityRealm.createAccount(\\\"$JENKINS_USERNAME\\\", \\\"$JENKINS_PASSWORD\\\")\" | java -jar `locate jenkins-cli.jar` -auth admin:`cat /var/lib/jenkins/secrets/initialAdminPassword` -s http://localhost:8080/ groovy =",
         "## Install plugins",
-        "cd /root/ && java -jar `locate jenkins-cli.jar` -s http://localhost:8080/ install-plugin cloudbees-folder build-timeout timestamper ws-cleanup workflow-aggregator pipeline-stage-view git docker-commons github ssh-slaves matrix-auth email-ext mailer credentials-binding --username $JENKINS_USERNAME --password $JENKINS_PASSWORD",
+        "## Other plugins to consider: cloudbees-folder build-timeout timestamper ws-cleanup workflow-aggregator pipeline-stage-view git github-branch-source docker-commons github ssh-slaves matrix-auth email-ext mailer credentials-binding",
+        "cd /root/ && java -jar `locate jenkins-cli.jar` -s http://localhost:8080/ install-plugin git github github-pullrequest github-branch-source --username $JENKINS_USERNAME --password $JENKINS_PASSWORD",
         "## Change jenkins to only listen on address 127.0.0.1, will be redirected with apache2",
         "sed -i -e 's/--httpPort=$HTTP_PORT/--httpPort=$HTTP_PORT --httpListenAddress=127.0.0.1/' /etc/default/jenkins",
         "systemctl restart jenkins",
@@ -74,14 +84,8 @@
         "apt-cache policy docker-ce",
         "apt-get install -y docker-ce",
         "systemctl start docker",
-        "systemctl enable docker",
+        "systemctl enable docker"
 
-        "# Add 2G swap",
-        "dd if=/dev/zero of=/swapfile bs=256M count=8",
-        "chmod 600 /swapfile",
-        "mkswap /swapfile",
-        "swapon /swapfile",
-        "echo \"/swapfile   none    swap    sw    0   0\" >> /etc/fstab"
 
       ]
     }
