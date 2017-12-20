@@ -62,7 +62,7 @@
         "echo \"jenkins.model.Jenkins.instance.securityRealm.createAccount(\\\"$JENKINS_USERNAME\\\", \\\"$JENKINS_PASSWORD\\\")\" | java -jar `locate jenkins-cli.jar` -auth admin:`cat /var/lib/jenkins/secrets/initialAdminPassword` -s http://localhost:8080/ groovy =",
         "## Install plugins",
         "## Other plugins to consider: cloudbees-folder build-timeout timestamper ws-cleanup workflow-aggregator pipeline-stage-view git github-branch-source docker-commons github ssh-slaves matrix-auth email-ext mailer credentials-binding",
-        "cd /root/ && java -jar `locate jenkins-cli.jar` -s http://localhost:8080/ install-plugin git github github-pullrequest github-branch-source --username $JENKINS_USERNAME --password $JENKINS_PASSWORD",
+        "cd /root/ && java -jar `locate jenkins-cli.jar` -s http://localhost:8080/ install-plugin git github github-pullrequest github-branch-source email-ext --username $JENKINS_USERNAME --password $JENKINS_PASSWORD",
         "## Change jenkins to only listen on address 127.0.0.1, will be redirected with apache2",
         "sed -i -e 's/--httpPort=$HTTP_PORT/--httpPort=$HTTP_PORT --httpListenAddress=127.0.0.1/' /etc/default/jenkins",
         "systemctl restart jenkins",
@@ -90,7 +90,10 @@
         "# Setup Postfix",
         "debconf-set-selections <<< \"postfix postfix/mailname string `hostname`\"",
         "debconf-set-selections <<< \"postfix postfix/main_mailer_type string 'Internet Site'\"",
-        "apt-get install -y postfix mailutils"
+        "apt-get install -y postfix mailutils",
+        "sed -i -e 's/inet_interfaces = all/inet_interfaces = localhost/g' /etc/postfix/main.cf",
+        "systemctl enable postfix",
+        "systemctl start postfix"
 
 
       ]
