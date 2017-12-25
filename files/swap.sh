@@ -1,4 +1,7 @@
 #!/bin/bash
+
+set -e
+
 ### SETUP SWAP ###
 # Add 2G swap
 dd if=/dev/zero of=/swapfile bs=256M count=8

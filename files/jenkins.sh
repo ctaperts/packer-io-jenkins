@@ -1,4 +1,7 @@
 #!/bin/bash
+
+set -e
+
 # SETUP JENKINS
 ## Install Java OpenJDK 7 and Install Jenkins
 apt-get install software-properties-common

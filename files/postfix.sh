@@ -1,4 +1,7 @@
 #!/bin/bash
+
+set -e
+
 # Setup Postfix",
 debconf-set-selections <<< "postfix postfix/mailname string `hostname`"
 debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'"
