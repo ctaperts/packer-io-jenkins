@@ -20,83 +20,15 @@
     },
     {
       "type": "shell",
-       "environment_vars": [
+      "environment_vars": [
         "JENKINS_USERNAME={{ user `jenkins_username` }}",
         "JENKINS_PASSWORD={{ user `jenkins_password` }}"
-    ],
-      "inline": [
-        "### NOTES ###",
-        "# Digital Ocean is using root, does not need sudo",
-
-        "# VARS",
-        "export JENKINS_ADMIN_PASSWORD_FILE=\"/var/lib/jenkins/secrets/initialAdminPassword\"",
-        "export JENKIN_IP=`curl ifconfig.co`",
-
-        "### SETUP SWAP ###",
-        "# Add 2G swap",
-        "dd if=/dev/zero of=/swapfile bs=256M count=8",
-        "chmod 600 /swapfile",
-        "mkswap /swapfile",
-        "swapon /swapfile",
-        "echo \"/swapfile   none    swap    sw    0   0\" >> /etc/fstab",
-        "sync; echo 1 > /proc/sys/vm/drop_caches",
-
-        "### START ###",
-        "# SETUP JENKINS",
-        "## Install Java OpenJDK 7 and Install Jenkins",
-        "apt-get install software-properties-common",
-        "add-apt-repository ppa:openjdk-r/ppa -y",
-        "wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo apt-key add -",
-        "echo 'deb https://pkg.jenkins.io/debian-stable binary/' | tee -a /etc/apt/sources.list",
-        "apt-get update",
-        "apt-get install -y mlocate",
-        "apt-get install -y openjdk-7-jdk",
-        "apt-get install -y jenkins",
-        "systemctl start jenkins",
-        "systemctl enable jenkins",
-
-        "## Add Jenkins User",
-        "while [ ! -f $JENKINS_ADMIN_PASSWORD_FILE ]; do echo @$JENKIN_IP: $JENKINS_ADMIN_PASSWORD_FILE file does not exist... sleeping && sleep 2;done",
-        "echo sleeping 10 seconds && sleep 10",
-        "updatedb",
-        "echo \"jenkins.model.Jenkins.instance.securityRealm.createAccount(\\\"$JENKINS_USERNAME\\\", \\\"$JENKINS_PASSWORD\\\")\" | java -jar `locate jenkins-cli.jar` -auth admin:`cat /var/lib/jenkins/secrets/initialAdminPassword` -s http://localhost:8080/ groovy =",
-        "## Install plugins",
-        "## Other plugins to consider: cloudbees-folder build-timeout timestamper ws-cleanup workflow-aggregator pipeline-stage-view git github-branch-source docker-commons github ssh-slaves matrix-auth email-ext mailer credentials-binding",
-        "cd /root/ && java -jar `locate jenkins-cli.jar` -s http://localhost:8080/ install-plugin git github github-pullrequest github-branch-source email-ext docker-plugin --username $JENKINS_USERNAME --password $JENKINS_PASSWORD",
-        "## Change jenkins to only listen on address 127.0.0.1, will be redirected with apache2",
-        "sed -i -e 's/--httpPort=$HTTP_PORT/--httpPort=$HTTP_PORT --httpListenAddress=127.0.0.1/' /etc/default/jenkins",
-        "systemctl restart jenkins",
-
-        "# SETUP APACHE REVERSE PROXY",
-        "mkdir /etc/ssl/jenkins",
-        "cd /etc/ssl/jenkins && openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout jenkins.key -out jenkins.crt -subj '/C=US/ST=NY/L=NY/O=jenkins/OU=jenkins/CN=jenkins'",
-        "apt-get install apache2 -y",
-        "a2enmod proxy proxy_http proxy_html ssl headers",
-        "mv /tmp/jenkins.conf /etc/apache2/conf-available/jenkins.conf",
-        "ln -s /etc/apache2/conf-available/jenkins.conf /etc/apache2/conf-enabled/",
-        "systemctl restart apache2",
-        "systemctl enable apache2",
-
-        "# Add docker",
-        "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -",
-        "add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\"",
-        "apt-get update",
-        "apt-cache policy docker-ce",
-        "apt-get install -y docker-ce",
-        "systemctl start docker",
-        "systemctl enable docker",
-        "usermod -aG docker jenkins",
-
-        "# Setup Postfix",
-        "debconf-set-selections <<< \"postfix postfix/mailname string `hostname`\"",
-        "debconf-set-selections <<< \"postfix postfix/main_mailer_type string 'Internet Site'\"",
-        "apt-get install -y postfix mailutils",
-        "sed -i -e 's/inet_interfaces = all/inet_interfaces = localhost/g' /etc/postfix/main.cf",
-        "systemctl enable postfix",
-        "systemctl start postfix"
-
-
-      ]
+      ],
+      "script": "files/swap.sh",
+      "script": "files/apache2.sh",
+      "script": "files/docker.sh",
+      "script": "files/postfix.sh",
+      "script": "files/jenkins.sh"
     }
   ]
 }
